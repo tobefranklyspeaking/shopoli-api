@@ -105,49 +105,50 @@ To get a local copy up and running follow these simple steps.
 
 ### API Routes
 
-List Questions
-  GET /qa/questions
-    product_id	   integer	      Specifies the product for which to retrieve questions.
-    page	         integer	      Selects the page of results to return. Default 1.
-    count	         integer	      Specifies how many results per page to return. Default 5.
 
-Answers List
-  GET /qa/questions/:question_id/answers
-    Parameters
-      question_id 	integer	     	Required ID of the question for which answers are needed
-    Query Parameters
-      page	        integer	     	Selects the page of results to return. Default 1.
-      count     	  integer	     	Specifies how many results per page to return. Default 5.
-
-Add a Question
-  POST /qa/questions
-    body	          text	      	Text of question being asked
-    name	          text	      	Username for question asker
-    email	          text	       	Email address for question asker
-    product_id	    integer	     	Required ID of the Product for which the question is posted
-
-Add an Answer
-  POST /qa/questions/:question_id/answers
-    Parameters
-      question_id	  integer       Required ID of the question to post the answer for
-    Body Parameters
-      body	       text		        Text of question being asked
-      name	       text		        Username for question asker
-      email	       text		        Email address for question asker
-      photos	     [text]		      An array of urls corresponding to images to display
-
-Mark Question as Helpful
-  PUT /qa/questions/:question_id/helpful
-    question_id	   integer		    Required ID of the question to update
-
-Report Question
-  PUT /qa/questions/:question_id/report
-    question_id	   integer      	Required ID of the question to update
-
-Mark Answer as Helpful
-  PUT /qa/answers/:answer_id/helpful
-    answer_id   	  integer	      Required ID of the answer to update
-
-Report Answer
-  PUT /qa/answers/:answer_id/report
-    answer_id	      integer	      Required ID of the answer to update
+| List Questions |
+| GET /qa/questions |
+| product_id	 |  integer	   |   Specifies the product for which to retrieve questions. |
+| page	       |  integer	  |    Selects the page of results to return. Default 1.|
+| count	       |  integer	 |     Specifies how many results per page to return. Default 5. |
+|
+| Answers List
+|   GET /qa/questions/:question_id/answers
+|     Parameters
+|       question_id 	integer	     	Required ID of the question for which answers are needed
+|     Query Parameters
+|       page	        integer	     	Selects the page of results to return. Default 1.
+|       count     	  integer	     	Specifies how many results per page to return. Default 5.
+|
+| Add a Question
+|   POST /qa/questions
+|     body	          text	      	Text of question being asked
+|     name	          text	      	Username for question asker
+|     email	          text	       	Email address for question asker
+|     product_id	    integer	     	Required ID of the Product for which the question is posted
+|
+| Add an Answer
+|   POST /qa/questions/:question_id/answers
+|     Parameters
+|       question_id	  integer       Required ID of the question to post the answer for
+|     Body Parameters
+|       body	       text		        Text of question being asked
+|       name	       text		        Username for question asker
+|       email	       text		        Email address for question asker
+|       photos	     [text]		      An array of urls corresponding to images to display
+|
+| Mark Question as Helpful
+|   PUT /qa/questions/:question_id/helpful
+|     question_id	   integer		    Required ID of the question to update
+|
+| Report Question
+|   PUT /qa/questions/:question_id/report
+|     question_id	   integer      	Required ID of the question to update
+|
+| Mark Answer as Helpful
+|   PUT /qa/answers/:answer_id/helpful
+|     answer_id   	  integer	      Required ID of the answer to update
+|
+| Report Answer
+|   PUT /qa/answers/:answer_id/report
+|     answer_id	      integer	      Required ID of the answer to update
