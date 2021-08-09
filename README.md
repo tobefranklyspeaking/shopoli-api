@@ -107,6 +107,7 @@ To get a local copy up and running follow these simple steps.
 
 
 | List Questions |
+| ------------------ | ----------------------------------------------------------------------|
 | GET /qa/questions |
 | product_id	 |  integer	   |   Specifies the product for which to retrieve questions. |
 | page	       |  integer	  |    Selects the page of results to return. Default 1.|
