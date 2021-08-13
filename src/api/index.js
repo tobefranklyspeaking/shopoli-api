@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./routes.js');
 const app = express();
+const port = 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // });
 
 app.get('/qa/questions', db.getAllQuestions);
-
+app.get('/qa/questions/:product_id', db.getQuestionsById);
 app.listen(3000);
 
 // app.get('/qa/questions', async (req, res) => {
