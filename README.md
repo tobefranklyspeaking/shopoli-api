@@ -12,7 +12,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/shale-rfe4/qanda">
+  <a href="https://github.com/shale-rfe4/ecommerce-api-qa">
     <img src="http://t3.gstatic.com/licensed-image?q=tbn:ANd9GcTXqLCtTIJVMkp-ywPWa_aOmdB4XoAqH5maOZdmg1haILmb5DEWdS9UA-Mx3LDQtnPnj1qyjk2ip9KIZr-6_mg" alt="Logo" width="80" height="80">
   </a>
 
@@ -21,17 +21,12 @@
   <p align="center">
     This project utilizes server design.
     <br />
-    <a href="https://github.com/shale-rfe4/qanda"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/shale-rfe4/ecommerce-api-qa"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/shale-rfe4/qanda">View Demo</a>
+    <a href="https://github.com/shale-rfe4/ecommerce-api-qa">View Demo</a>
     ·
-    <a href="https://github.com/melikaxo/hr-rfe4-shale/issues">
-
-
-
-
-      rt Bug</a>
+    <a href="https://github.com/melikaxo/hr-rfe4-shale/issues"> Report Bug</a>
     ·
     <a href="https://github.com/melikaxo/hr-rfe4-shale/issues">Request Feature</a>
   </p>

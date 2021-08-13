@@ -4,7 +4,7 @@ CREATE DATABASE qaapi;
 \connect qaapi;
 
 CREATE TABLE IF NOT EXISTS questions (
-  id SERIAL PRIMARY KEY NOT NULL,
+  question_id SERIAL PRIMARY KEY NOT NULL,
   product_id INTEGER NOT NULL,
   body TEXT NOT NULL,
   date_written BIGINT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS questions (
 );
 
 CREATE TABLE IF NOT EXISTS answers (
-  id SERIAL NOT NULL PRIMARY KEY,
+  answer_id SERIAL NOT NULL PRIMARY KEY,
   question_id INTEGER NOT NULL,
   body TEXT NOT NULL,
   date_written BIGINT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS answers (
 );
 
 CREATE TABLE IF NOT EXISTS photos (
-  id SERIAL NOT NULL PRIMARY KEY,
+  photo_id SERIAL NOT NULL PRIMARY KEY,
   answer_id integer NOT NULL,
   url VARCHAR(2083) NOT NULL
 );
@@ -56,5 +56,9 @@ select to_timestamp(date_written/1000) from answers limit 1;
 
 select to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS.MSZ') from answers limit 1;
 
+ALTER TABLE answers ALTER COLUMN date_written SET DATA TYPE timestamp without time zone USING to_timestamp(date_written/1000),
+ALTER COLUMN date_written SET DEFAULT current_timestamp;
+
 alter table answers
-alter date_written type varchar using to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS.MSZ');
+alter date_written type datetime to_timestamp(date_written/1000);
+-- alter date_written type varchar using to_char(to_timestamp(date_written/1000), 'YYYY-MM-DD"T"HH24:MI:SS.MSZ');
