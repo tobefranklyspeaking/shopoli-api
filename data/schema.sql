@@ -124,18 +124,20 @@ left joint answers_photos
 on answers.id = photos.answer_id
 
 `
-  SELECT questions.id AS question_id, questions.question_body, questions.question_date, questions.asker_name, questions.question_helpfulness, questions.reported,
-  JSONB_BUILD_OBJECT(‘hello’,
-    JSONB_BUILD_OBJECT(‘id’, answers.id, ‘body’, answers.body, ‘date’, answers.date_written, ‘answerer_name’, answers.answerer_name,‘helpfulness’, answers.helpfulness, ‘photos’,
-      ARRAY_AGG(answers_photos.url))) AS answers
+  SELECT
+    q.product_id as product_id,
+  questions.id AS question_id, questions.body, questions.date_written, questions.asker_name, questions.helpful, questions.reported,
+  JSONB_BUILD_OBJECT(answers.id,
+    JSONB_BUILD_OBJECT('id', answers.id, 'body', answers.body, 'date', answers.date_written, 'answerer_name', answers.answerer_name,'helpfulness', answers.helpful, 'photos',
+      ARRAY_AGG(photos.url))) AS answers
   FROM questions
   LEFT JOIN answers
   ON questions.id = answers.question_id
-  LEFT JOIN answers_photos
-  ON answers.id = answers_photos.answer_id
-  WHERE questions.product_id = ${req.query.product_id} AND questions.reported = false
+  LEFT JOIN photos
+  ON answers.id = photos.answer_id
+  WHERE questions.product_id = 307
   GROUP BY questions.id, answers.id
-  LIMIT 10`
+  LIMIT 10;`
 
   -- QUESTIONS
   -- used below
@@ -211,6 +213,60 @@ LIMIT
 
 /****** Trying to get only data required ******/
 
+SELECT
+  q.product_id as product_id,
+  row_to_json(q.*) as results,
+  row_to_json(a.*) as answers,
+  row_to_json(p.*) as photos
+FROM
+  questions q
+INNER JOIN
+  answers a
+ON
+  q.id = a.question_id
+INNER JOIN
+  photos p
+ON
+  a.id = p.answer_id
+WHERE
+  q.product_id = 307;
+
+/****** data not in right shape ******/
+SELECT
+  q.product_id as product_id,
+  json_build_object(
+      "question_id", q.id,
+      "question_body", q.body,
+      "question_date", q.date_written,
+      "asker_name",  q.asker_name,
+      "question_helpfuless", q.helpful,
+      "reported", q.reported,
+      "answers", json_build_object(
+          "id", a.id,
+          "body", a.body,
+          "date", a.date_written,
+          "answerer_name", a.answerer_name,
+          "helpfulness", a.helpful,
+          "photos", ARRAY_AGG(p.url)
+      )
+  ) as results
+FROM
+  questions q
+INNER JOIN
+  answers a
+ON
+  q.id = a.question_id
+INNER JOIN
+  photos p
+ON
+  a.id = p.answer_id
+WHERE
+  q.product_id = 307;
+
+
+  groupby question_id
+  index columns
+
 WITH
   quest
 AS
@@ -240,17 +296,9 @@ AS
     answers a
 )
 
-ARRAY_AGG (
-  photos.url
-)
-
 SELECT
   q.product_id as product_id,
-  json_build_object(
-      "question_id", q.id,
-
-      )
-  ) as results
+  row_to_json(quest.*) as results,
 FROM
   questions q
 INNER JOIN
@@ -266,34 +314,269 @@ WHERE
 
 
 
+WITH
+  ans
+AS
+(
+  SELECT
+    a.id as id,
+    a.body as body,
+    a.date_written as date,
+    a.answerer_name as answerer_name,
+    a.helpful as helpfulness,
+    array_agg(p.url) as photos
+  FROM
+    answers a
+  INNER JOIN
+    photos p
+  ON
+    p.answer_id = a.id
+  GROUP BY a.id
+),
 
+  quest
+AS
+(
+  SELECT
+    q.id as question_id,
+    q.body as question_body,
+    q.date_written as question_date,
+    q.asker_name as asker_name,
+    q.helpful as question_helpfulness,
+    q.reported as reported,
+    row_to_json(a.*) as answers
+  FROM
+    questions q
+  INNER JOIN
+    ans a
+  ON
+    a.question_id = q.id
+  GROUP BY
+    q.id, a.*
+)
 
+select
+  qu.product_id as product_id,
+  row_to_json(q.*) as results
+from questions qu limit 5;
 
 
 SELECT
-  q.id as question_id,
-  q.body as question_body,
-  q.date_written as question_date,
-  q.asker_name as asker_name,
-  q.asker_email as asker_email,
-  q.helpful as question_helpfulness,
-  q.reported as reported,
-  row_to_json(a.*) as answers
-FROM
-  questions q
-INNER JOIN
-  answers a
-ON
-  q.id = a.question_id
-WHERE
-  q.product_id = 307;
-LIMIT
-  5;
+  q.product_id as product_id,
+  array_agg( jsonb_build_object (
+    'question_id', q.id,
+    'question_body', q.body,
+    'question_date', q.date_written,
+    'asker_name',  q.asker_name,
+    'question_helpfuless', q.helpful,
+    'reported', q.reported,
+    'answers',
+      jsonb_build_object (
+        a.id, jsonb_build_object (
+          'id', a.id,
+          'body', a.body,
+          'date', a.date_written,
+          'answerer_name', a.answerer_name,
+          'helpfulness', a.helpful,
+          'photos', ARRAY_AGG(p.url)
+        )
+      )
+    ) as results )
+  FROM
+    questions q
+  LEFT JOIN
+    answers a
+  ON
+    a.question_id = q.id
+  LEFT JOIN
+    photos p
+  ON
+    p.answer_id = a.id
+  GROUP BY
+    a.id, q.product_id, q.id
+  LIMIT 5;
 
-  row_to_json(quest) as results,
-  row_to_json(ans) as answers,
-  ARRAY_AGG(p.url) as photos
 
-  groupby question_id
+  SELECT
+    q.product_id as product_id,
+    JSON_BUILD_OBJECT(
+      'question_id', q.id,
+      'question_body', q.body,
+      'question_date', q.date_written,
+      'asker_name',  q.asker_name,
+      'question_helpfuless', q.helpful,
+      'reported', q.reported,
+      'answers', array_agg(JSON_BUILD_OBJECT (
+        a.id,
+          JSON_BUILD_OBJECT (
+            'id', a.id,
+            'body', a.body,
+            'date', a.date_written,
+            'answerer_name', a.answerer_name,
+            'helpfulness', a.helpful,
+            'photos', ARRAY_AGG(p.url)
+          )
+       ))
+    ) as results
+  FROM
+    questions q
+  LEFT JOIN
+    answers a
+  ON
+    q.id = a.question_id
+  LEFT JOIN
+    photos p
+  ON
+    a.id = p.answer_id
+  WHERE
+    q.product_id = 307
+  GROUP BY
+    q.id, a.id, q.product_id
+  LIMIT 10;
 
-  index columns
+SELECT
+      q.product_id as product_id,
+      JSON_BUILD_OBJECT(
+        'question_id', q.id,
+        'question_body', q.body,
+        'question_date', q.date_written,
+        'asker_name',  q.asker_name,
+        'question_helpfuless', q.helpful,
+        'reported', q.reported,
+        'answers', JSON_BUILD_OBJECT (
+          a.id, JSON_BUILD_OBJECT (
+            'id', a.id,
+            'body', a.body,
+            'date', a.date_written,
+            'answerer_name', a.answerer_name,
+            'helpfulness', a.helpful,
+            'photos', JSON_AGG(p.url)
+          )
+        )
+      ) as results
+    FROM
+      questions q
+    LEFT JOIN
+      answers a
+    ON
+      q.id = a.question_id
+    LEFT JOIN
+      photos p
+    ON
+      a.id = p.answer_id
+    WHERE
+      q.product_id = 1
+    GROUP BY
+      q.product_id, q.id, a.id
+    LIMIT
+      2;
+
+
+SELECT
+  JSON_BUILD_OBJECT (
+      'product_id', q.product_id,
+      'results', JSON_AGG (
+          JSON_BUILD_OBJECT(
+              'question_id', q.id,
+              'question_body', q.body,
+              'question_date', q.date_written,
+              'asker_name',  q.asker_name,
+              'question_helpfuless', q.helpful,
+              'reported', q.reported
+          )
+      ) product_id,
+  )
+FROM questions q
+LIMIT 1;
+
+
+  LEFT JOIN (
+      SELECT
+          'answers',
+          JSON_AGG(
+              JSON.JSON_BUILD_OBJECT(
+
+              )
+          )
+  )
+        'answers', JSON_BUILD_OBJECT (
+          a.id, JSON_BUILD_OBJECT (
+            'id', a.id,
+            'body', a.body,
+            'date', a.date_written,
+            'answerer_name', a.answerer_name,
+            'helpfulness', a.helpful,
+            'photos', JSON_AGG(p.url)
+          )
+        )
+      ) as results
+    FROM
+      questions q
+    LEFT JOIN
+      answers a
+    ON
+      q.id = a.question_id
+    LEFT JOIN
+      photos p
+    ON
+      a.id = p.answer_id
+    WHERE
+      q.product_id = 1
+    GROUP BY
+      q.product_id, q.id, a.id
+    LIMIT
+      2;
+
+SELECT
+    q.id AS question_id,
+    q.body AS question_body,
+    q.date_written AS question_date,
+    q.asker_name AS asker_name,
+    q.helpful AS question_helpfulness,
+    q.reported AS reported,
+  COALESCE(
+    JSON_OBJECT_AGG(
+      a.id,
+        JSON_BUILD_OBJECT(
+          'id', a.id,
+          'body', a.body,
+          'date', a.date_written,
+          'answerer_name', a.answerer_name,
+          'helpfulness', a.helpful,
+          'photos', ARRAY(
+            SELECT photos.url
+            FROM photos
+            WHERE photos.answer_id = a.id
+          )))
+          FILTER (
+            WHERE
+              a.id
+            IS NOT NULL),
+             '{}'::JSON)
+            AS
+              answers
+  FROM
+    questions q
+  LEFT JOIN
+    answers a
+  ON
+    q.id = a.question_id
+  WHERE
+    q.product_id = 307
+  AND
+    q.reported > 0
+  GROUP BY
+    q.id
+  LIMIT
+    5;
+
+
+        questions.product_id = ${req.query.product_id}
+  AND
+    questions.reported = false
+  GROUP BY
+    questions.id
+  LIMIT
+    ${count}
+  OFFSET
+    (${count * page - count});

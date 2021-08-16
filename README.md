@@ -107,7 +107,7 @@ Answers Table Headers
 id  question_id  body  date_written  answerer_name  answerer_email  reported  helpful
 
 Photos Table Headers
-id  answers_id  url
+id  answer_id  url
 
 | ----- Requires formatting -----------|
 | List Questions |

@@ -13,33 +13,48 @@ const getQuestionsById = async (req, response) => {
   const client = await pool.connect();
   const { product_id, page = 1, count = 5 } = req.query;
 
-
-  //   ` select
-  //   main.*,
-  //   row_to_json(sec.*) as answers
-  // from questions main
-  // inner join answers sec using(question_id)
-  // `
-  console.log(req.query);
   let data = pool.query(
-    ` SELECT
-        q.*,
-        row_to_json(a.*) as answers
-      FROM
-        questions q
-      INNER JOIN
-        answers a
-      ON
-        q.id = a.question_id
-      WHERE
-        q.product_id = 307
-      LIMIT
-        5;`,
+    `SELECT
+    q.product_id as product_id,
+    JSON_BUILD_OBJECT(
+      'question_id', q.id,
+      'question_body', q.body,
+      'question_date', q.date_written,
+      'asker_name',  q.asker_name,
+      'question_helpfuless', q.helpful,
+      'reported', q.reported,
+      'answers', JSON_BUILD_OBJECT (
+        a.id, JSON_BUILD_OBJECT (
+          'id', a.id,
+          'body', a.body,
+          'date', a.date_written,
+          'answerer_name', a.answerer_name,
+          'helpfulness', a.helpful,
+          'photos', JSON_AGG(p.url)
+        )
+      )
+    ) as results
+  FROM
+    questions q
+  LEFT JOIN
+    answers a
+  ON
+    q.id = a.question_id
+  LEFT JOIN
+    photos p
+  ON
+    a.id = p.answer_id
+  WHERE
+    q.product_id = $1
+  GROUP BY
+    q.product_id, q.id, a.id
+  LIMIT
+    $2`,
     [product_id, count], (err, results) => {
       if (err) { return; }
       response.status(200).json(results.rows);
       client.release();
-  }
+    }
   )
 }
 
