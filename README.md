@@ -26,9 +26,9 @@
     <br />
     <a href="https://github.com/shale-rfe4/ecommerce-api-qa">View Demo</a>
     ·
-    <a href="https://github.com/melikaxo/hr-rfe4-shale/issues"> Report Bug</a>
+    <a href="https://github.com/shale-rfe4/issues"> Report Bug</a>
     ·
-    <a href="https://github.com/melikaxo/hr-rfe4-shale/issues">Request Feature</a>
+    <a href="https://github.com/shale-rfe4/issues">Request Feature</a>
   </p>
 </p>
 
