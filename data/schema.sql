@@ -534,27 +534,27 @@ SELECT
     q.asker_name AS asker_name,
     q.helpful AS question_helpfulness,
     q.reported AS reported,
-  COALESCE(
-    JSON_OBJECT_AGG(
-      a.id,
-        JSON_BUILD_OBJECT(
-          'id', a.id,
-          'body', a.body,
-          'date', a.date_written,
-          'answerer_name', a.answerer_name,
-          'helpfulness', a.helpful,
-          'photos', ARRAY(
-            SELECT photos.url
-            FROM photos
-            WHERE photos.answer_id = a.id
-          )))
-          FILTER (
-            WHERE
-              a.id
-            IS NOT NULL),
-             '{}'::JSON)
-            AS
-              answers
+    COALESCE(
+      JSON_OBJECT_AGG(
+        a.id,
+          JSON_BUILD_OBJECT(
+            'id', a.id,
+            'body', a.body,
+            'date', a.date_written,
+            'answerer_name', a.answerer_name,
+            'helpfulness', a.helpful,
+            'photos', ARRAY(
+              SELECT photos.url
+              FROM photos
+              WHERE photos.answer_id = a.id
+            )))
+            FILTER (
+              WHERE
+                a.id
+              IS NOT NULL),
+              '{}'::JSON)
+              AS
+                answers
   FROM
     questions q
   LEFT JOIN
@@ -580,3 +580,47 @@ SELECT
     ${count}
   OFFSET
     (${count * page - count});
+
+/********************answers********************/
+
+  SELECT
+    a.id as id,
+    a.body as body,
+    a.date_written as date,
+    a.answerer_name as answerer_name,
+    a.helpful as helpfulness,
+    COALESCE(
+      ARRAY_AGG(
+        JSON_BUILD_OBJECT(
+          'id', photos.id,
+          'url', photos.url
+        )
+      ) FILTER
+      (
+        WHERE
+          photos.id
+        IS NOT NULL),
+    '{}')
+    AS
+      photos
+  FROM
+    answers a
+  LEFT JOIN
+    photos
+  ON
+    answers.id = photos.answer_id
+  WHERE
+    answers.question_id = $3
+      AND
+        answers.reported = false
+  GROUP BY
+    answers.id
+  LIMIT
+    $2
+  OFFSET
+    $1
+
+/**********************************************/
+
+REDIS Cache
+DOCKER

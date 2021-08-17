@@ -3,57 +3,73 @@ const POSTGRES_DB_LOGIN = require('/Users/franklyspeaking/HackReactor/sprints/ec
 
 const pool = new Pool(POSTGRES_DB_LOGIN);
 
-const getAllData = async (req, res) => {
-
-
-}
-
 // QUESTIONS LIST - GET /qa/questions
 const getQuestionsById = async (req, response) => {
   const client = await pool.connect();
   const { product_id, page = 1, count = 5 } = req.query;
+  const interval = (count * page) - count;
 
-  let data = pool.query(
-    `SELECT
-    q.product_id as product_id,
-    JSON_BUILD_OBJECT(
-      'question_id', q.id,
-      'question_body', q.body,
-      'question_date', q.date_written,
-      'asker_name',  q.asker_name,
-      'question_helpfuless', q.helpful,
-      'reported', q.reported,
-      'answers', JSON_BUILD_OBJECT (
-        a.id, JSON_BUILD_OBJECT (
-          'id', a.id,
-          'body', a.body,
-          'date', a.date_written,
-          'answerer_name', a.answerer_name,
-          'helpfulness', a.helpful,
-          'photos', JSON_AGG(p.url)
+  let data = pool.query(`
+    SELECT
+      q.id AS question_id,
+      q.body AS question_body,
+      q.date_written AS question_date,
+      q.asker_name AS asker_name,
+      q.helpful AS question_helpfulness,
+      q.reported AS reported,
+      COALESCE(
+        JSON_OBJECT_AGG(
+          a.id,
+          JSON_BUILD_OBJECT(
+            'id', a.id,
+            'body', a.body,
+            'date', a.date_written,
+            'answerer_name', a.answerer_name,
+            'helpfulness', a.helpful,
+            'photos', ARRAY(
+              SELECT photos.url
+              FROM photos
+              WHERE photos.answer_id = a.id
+          )
         )
       )
-    ) as results
-  FROM
-    questions q
-  LEFT JOIN
-    answers a
-  ON
-    q.id = a.question_id
-  LEFT JOIN
-    photos p
-  ON
-    a.id = p.answer_id
-  WHERE
-    q.product_id = $1
-  GROUP BY
-    q.product_id, q.id, a.id
-  LIMIT
-    $2`,
-    [product_id, count], (err, results) => {
-      if (err) { return; }
-      response.status(200).json(results.rows);
-      client.release();
+      FILTER (
+        WHERE
+          a.id
+        IS NOT NULL),
+          '{}'::JSON)
+        AS
+          answers
+      FROM
+        questions q
+      LEFT JOIN
+        answers a
+      ON
+        q.id = a.question_id
+      WHERE
+        q.product_id = $1
+      AND
+        q.reported = 0
+      GROUP BY
+        q.id
+      LIMIT
+        $2
+      OFFSET
+        $3`,
+    [product_id, count, interval],
+    (err, results) => {
+      if (err) { res.send('Error in request') }
+      if (!req.query.product_id) {
+        response.status(422).end('Error: invalid product_id provided');
+        client.release();
+      } else {
+        let resultObj = {
+          product_id: req.query.product_id,
+          results: results.rows
+        }
+        response.status(200).json(resultObj);
+        client.release();
+      }
     }
   )
 }
@@ -62,26 +78,77 @@ const getQuestionsById = async (req, response) => {
 const getAnswersById = async (req, response) => {
   const client = await pool.connect();
   const { question_id } = req.params;
-  pool.query(`SELECT * FROM answers WHERE question_id = $1`, [question_id], (err, result) => {
-    if (err) {
-      throw err;
+  const { page = 1, count = 5 } = req.query;
+  const interval = (count * page) - count;
+
+  pool.query(`
+    SELECT
+      a.id as id,
+      a.body as body,
+      a.date_written as date,
+      a.answerer_name as answerer_name,
+      a.helpful as helpfulness,
+      COALESCE(
+        ARRAY_AGG(
+          JSON_BUILD_OBJECT(
+            'id', photos.id,
+            'url', photos.url
+          )
+        ) FILTER
+        (
+          WHERE
+            photos.id
+          IS NOT NULL),
+      '{}')
+      AS
+        photos
+    FROM
+      answers a
+    LEFT JOIN
+      photos
+    ON
+      a.id = photos.answer_id
+    WHERE
+      a.question_id = $1
+        AND
+          a.reported = 0
+    GROUP BY
+      a.id
+    LIMIT
+      $2
+    OFFSET
+      $3`, [question_id, count, interval],
+    (err, results) => {
+      if (err) {
+        throw err;
+      }
+      let resultObj = {
+        question_id: req.params.question_id,
+        results: results.rows
+      }
+      response.status(200).json(resultObj);
+      client.release();
     }
-    response.status(200).json(result.rows)
-    client.release();
-  })
+  )
 }
 
 // ADD A QUESTION = POST /qa/questions
 const addAQuestion = async (req, response) => {
   const client = await pool.connect();
   const { body, name, email, product_id } = req.body;
-  pool.query('INSERT INTO questions (body, asker_name, asker_email, product_id) VALUES ($1,$2,$3,$4)', [body, name, email, product_id], (err, result) => {
-    if (err) {
-      throw err;
-    }
-    response.status(200).json(result.rows)
-    client.release();
-  })
+  pool.query(`
+    INSERT INTO
+      questions
+      (body, asker_name, asker_email, product_id)
+    VALUES
+      ($1,$2,$3,$4)`, [body, name, email, product_id],
+    (err, result) => {
+      if (err) {
+        throw err;
+      }
+      response.status(200).json(result.rows)
+      client.release();
+    })
 }
 
 // ADD AN ANSWER - POST /qa/questions/:question_id/answers
@@ -89,8 +156,23 @@ const addAnAnswer = async (req, response) => {
   const client = await pool.connect();
   const { body, name, email, photos } = req.body;
   const { question_id } = req.params;
-  pool.query(
-    'INSERT INTO answers (body, answerer_name, answerer_email, question_id) VALUES ($1,$2,$3,$4); INSERT INTO photos (answer_id, url) VALUES (SELECT id FROM answers where question_id = $4) url = $5', [body, name, email, question_id, photos], (err, result) => {
+  pool.query(`
+    INSERT INTO
+      answers
+      (body, answerer_name, answerer_email, question_id)
+    VALUES
+      ($1,$2,$3,$4);
+    INSERT INTO
+      photos (answer_id, url)
+    VALUES (
+      SELECT
+        id
+      FROM
+        answers
+      WHERE
+        question_id = $4)
+      url = $5`, [body, name, email, question_id, photos],
+    (err, result) => {
       if (err) {
         throw err;
       }
@@ -103,8 +185,14 @@ const addAnAnswer = async (req, response) => {
 const markQuestionHelpful = async (req, response) => {
   const client = await pool.connect();
   const { question_id } = req.params;
-  pool.query(
-    'UPDATE questions SET helpful = helpful + 1 WHERE id = $1', [question_id], (err, result) => {
+  pool.query(`
+    UPDATE
+      questions
+    SET
+      helpful = helpful + 1
+    WHERE
+      id = $1`, [question_id],
+    (err, result) => {
       if (err) {
         throw err;
       }
@@ -116,8 +204,14 @@ const markQuestionHelpful = async (req, response) => {
 const reportQuestion = async (req, response) => {
   const client = await pool.connect();
   const { question_id } = req.params;
-  pool.query(
-    'UPDATE questions SET report = report + 1 WHERE id = $1', [question_id], (err, result) => {
+  pool.query(`
+    UPDATE
+      questions
+    SET
+      report = report + 1
+    WHERE
+      id = $1`, [question_id],
+    (err, result) => {
       if (err) {
         throw err;
       }
@@ -129,8 +223,14 @@ const reportQuestion = async (req, response) => {
 const markAnswerHelpful = async (req, response) => {
   const client = await pool.connect();
   const { question_id } = req.params;
-  pool.query(
-    'UPDATE answers SET helpful = helpful + 1 WHERE id = $1', [question_id], (err, result) => {
+  pool.query(`
+    UPDATE
+      answers
+    SET
+      helpful = helpful + 1
+    WHERE
+      id = $1`, [question_id],
+    (err, result) => {
       if (err) {
         throw err;
       }
@@ -142,8 +242,14 @@ const markAnswerHelpful = async (req, response) => {
 const reportAnswer = async (req, response) => {
   const client = await pool.connect();
   const { question_id } = req.params;
-  pool.query(
-    'UPDATE answers SET report = report + 1 WHERE id = $1', [question_id], (err, result) => {
+  pool.query(`
+    UPDATE
+      answers
+    SET
+      report = report + 1
+    WHERE
+      id = $1`, [question_id],
+    (err, result) => {
       if (err) {
         throw err;
       }
