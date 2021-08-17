@@ -5,7 +5,6 @@ const pool = new Pool(POSTGRES_DB_LOGIN);
 
 // QUESTIONS LIST - GET /qa/questions
 const getQuestionsById = async (req, response) => {
-  const client = await pool.connect();
   const { product_id, page = 1, count = 5 } = req.query;
   const interval = (count * page) - count;
 
@@ -57,18 +56,17 @@ const getQuestionsById = async (req, response) => {
       OFFSET
         $3`,
     [product_id, count, interval],
+
     (err, results) => {
       if (err) { res.send('Error in request') }
       if (!req.query.product_id) {
         response.status(422).end('Error: invalid product_id provided');
-        client.release();
       } else {
         let resultObj = {
           product_id: req.query.product_id,
           results: results.rows
         }
         response.status(200).json(resultObj);
-        client.release();
       }
     }
   )
@@ -76,7 +74,6 @@ const getQuestionsById = async (req, response) => {
 
 // ANSWERS LIST - GET /qa/questions/:question_id/answers
 const getAnswersById = async (req, response) => {
-  const client = await pool.connect();
   const { question_id } = req.params;
   const { page = 1, count = 5 } = req.query;
   const interval = (count * page) - count;
@@ -120,40 +117,37 @@ const getAnswersById = async (req, response) => {
       $3`, [question_id, count, interval],
     (err, results) => {
       if (err) {
-        throw err;
+        response.send(err);
       }
       let resultObj = {
         question_id: req.params.question_id,
         results: results.rows
       }
       response.status(200).json(resultObj);
-      client.release();
     }
   )
 }
 
 // ADD A QUESTION = POST /qa/questions
-const addAQuestion = async (req, response) => {
-  const client = await pool.connect();
+const addAQuestion = (req, response) => {
   const { body, name, email, product_id } = req.body;
+  pool.connect()
   pool.query(`
     INSERT INTO
       questions
       (body, asker_name, asker_email, product_id)
     VALUES
-      ($1,$2,$3,$4)`, [body, name, email, product_id],
-    (err, result) => {
-      if (err) {
-        throw err;
-      }
-      response.status(200).json(result.rows)
-      client.release();
-    })
+      ($1,$2,$3,$4)`, [body, name, email, product_id])
+  .then((err, result) => {
+    response.status(201).send('Successful post');
+  })
+  .catch((err) => {
+    response.send(err)
+  })
 }
 
 // ADD AN ANSWER - POST /qa/questions/:question_id/answers
 const addAnAnswer = async (req, response) => {
-  const client = await pool.connect();
   const { body, name, email, photos } = req.body;
   const { question_id } = req.params;
   pool.query(`
@@ -174,16 +168,14 @@ const addAnAnswer = async (req, response) => {
       url = $5`, [body, name, email, question_id, photos],
     (err, result) => {
       if (err) {
-        throw err;
+        response.send(err);
       }
-      response.status(200).json(result.rows)
-      client.release();
+      response.send('Successful answer post')
     })
 }
 
 // Mark Question as Helpful - PUT /qa/questions/:question_id/helpful
 const markQuestionHelpful = async (req, response) => {
-  const client = await pool.connect();
   const { question_id } = req.params;
   pool.query(`
     UPDATE
@@ -194,15 +186,14 @@ const markQuestionHelpful = async (req, response) => {
       id = $1`, [question_id],
     (err, result) => {
       if (err) {
-        throw err;
+        response.send(err);
       }
-      response.status(200).json(result.rows)
-      client.release();
+      response.send('Successful help')
     })
 }
+
 // Report Question - PUT /qa/questions/:question_id/report
 const reportQuestion = async (req, response) => {
-  const client = await pool.connect();
   const { question_id } = req.params;
   pool.query(`
     UPDATE
@@ -213,48 +204,45 @@ const reportQuestion = async (req, response) => {
       id = $1`, [question_id],
     (err, result) => {
       if (err) {
-        throw err;
+        response.send(err);
       }
-      response.status(200).json(result.rows)
-      client.release();
+      response.send('Successful report')
     })
 }
+
 // Mark Answer as Helpful - PUT /qa/answers/:answer_id/helpful
 const markAnswerHelpful = async (req, response) => {
-  const client = await pool.connect();
-  const { question_id } = req.params;
+  const { answer_id } = req.params;
   pool.query(`
     UPDATE
       answers
     SET
       helpful = helpful + 1
     WHERE
-      id = $1`, [question_id],
+      id = $1`, [answer_id],
     (err, result) => {
       if (err) {
-        throw err;
+        response.send(err);
       }
-      response.status(200).json(result.rows)
-      client.release();
+      response.send('Successful help')
     })
 }
+
 // Report Answer - PUT /qa/answers/:answer_id/report
 const reportAnswer = async (req, response) => {
-  const client = await pool.connect();
-  const { question_id } = req.params;
+  const { answer_id } = req.params;
   pool.query(`
     UPDATE
       answers
     SET
       report = report + 1
     WHERE
-      id = $1`, [question_id],
+      id = $1`, [answer_id],
     (err, result) => {
       if (err) {
-        throw err;
+        response.send(err);
       }
-      response.status(200).json(result.rows)
-      client.release();
+      response.send('Successful report')
     })
 }
 
