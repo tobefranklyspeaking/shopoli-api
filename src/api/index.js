@@ -15,10 +15,10 @@ app.post('/qa/questions', db.addAQuestion);
 app.post('/qa/questions/:question_id/answers', db.addAnAnswer);
 
 
-app.put('qa/questions/:question_id/helpful', db.markQuestionHelpful);
-app.put('qa/questions/:question_id/report', db.reportQuestion);
-app.put('qa/questions/:answer_id/helpful', db.markAnswerHelpful);
-app.put('qa/questions/:answer_id/report', db.reportAnswer);
+app.put('/qa/questions/:question_id/helpful', db.markQuestionHelpful);
+app.put('/qa/questions/:question_id/report', db.reportQuestion);
+app.put('/qa/answers/:answer_id/helpful', db.markAnswerHelpful);
+app.put('/qa/answers/:answer_id/report', db.reportAnswer);
 
 
 app.listen(3000);
