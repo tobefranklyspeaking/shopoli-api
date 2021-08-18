@@ -8,7 +8,7 @@ const getQuestionsById = async (req, res) => {
   const { product_id, page = 1, count = 5 } = req.query;
   const interval = (count * page) - count;
 
-  let data = pool.query(`
+  await pool.query(`
       SELECT
         q.id AS question_id,
         q.body AS question_body,
@@ -75,7 +75,7 @@ const getAnswersById = async (req, res) => {
   const { page = 1, count = 5 } = req.query;
   const interval = (count * page) - count;
 
-  pool.query(`
+  await pool.query(`
       SELECT
         a.id as id,
         a.body as body,
@@ -123,9 +123,9 @@ const getAnswersById = async (req, res) => {
 }
 
 // ADD A QUESTION = POST /qa/questions
-const addAQuestion = (req, res) => {
+const addAQuestion = async (req, res) => {
   const { body, name, email, product_id } = req.body;
-  pool.query(`
+  await pool.query(`
       INSERT INTO
         questions (body, product_id, asker_name, asker_email)
       VALUES
@@ -141,7 +141,7 @@ const addAQuestion = (req, res) => {
 const addAnAnswer = async (req, res) => {
   const { body, name, email, photos } = req.body;
   const { question_id } = req.params;
-  pool.query(`
+  await pool.query(`
       WITH
         build
       AS
@@ -172,7 +172,7 @@ const addAnAnswer = async (req, res) => {
 // Mark Question as Helpful - PUT /qa/questions/:question_id/helpful
 const markQuestionHelpful = async (req, res) => {
   const { question_id } = req.params;
-  pool.query(`
+  await pool.query(`
       UPDATE
         questions
       SET
@@ -188,7 +188,7 @@ const markQuestionHelpful = async (req, res) => {
 // Report Question - PUT /qa/questions/:question_id/report
 const reportQuestion = async (req, res) => {
   const { question_id } = req.params;
-  pool.query(`
+  await pool.query(`
       UPDATE
         questions
       SET
@@ -204,7 +204,7 @@ const reportQuestion = async (req, res) => {
 // Mark Answer as Helpful - PUT /qa/answers/:answer_id/helpful
 const markAnswerHelpful = async (req, res) => {
   const { answer_id } = req.params;
-  pool.query(`
+  await pool.query(`
       UPDATE
         answers
       SET
@@ -220,7 +220,7 @@ const markAnswerHelpful = async (req, res) => {
 // Report Answer - PUT /qa/answers/:answer_id/report
 const reportAnswer = async (req, res) => {
   const { answer_id } = req.params;
-  pool.query(`
+  await pool.query(`
       UPDATE
         answers
       SET

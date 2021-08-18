@@ -68,3 +68,8 @@ COPY answers FROM '/Users/franklyspeaking/Desktop/answers.csv' WITH DELIMITER ',
 COPY questions FROM '/Users/franklyspeaking/Desktop/questions.csv' WITH DELIMITER ',' CSV HEADER;
 
 COPY photos FROM '/Users/franklyspeaking/Desktop/answers_photos.csv' WITH DELIMITER ',' CSV HEADER;
+
+/******************* artillery.io *******************/
+artillery quick --count 2 --num 2 http://127.0.0.1:3000/qa/questions/1/answers
+
+artillery quick --count 2 --num 2 http://127.0.0.1:3000/qa/questions/?product_id=9999&count=100
