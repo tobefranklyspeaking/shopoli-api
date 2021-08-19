@@ -70,6 +70,58 @@ COPY questions FROM '/Users/franklyspeaking/Desktop/questions.csv' WITH DELIMITE
 COPY photos FROM '/Users/franklyspeaking/Desktop/answers_photos.csv' WITH DELIMITER ',' CSV HEADER;
 
 /******************* artillery.io *******************/
-artillery quick --count 2 --num 2 http://127.0.0.1:3000/qa/questions/1/answers
+artillery quick --count 1 --num 1000 http://127.0.0.1:3000/qa/questions/2500001/answers
 
-artillery quick --count 2 --num 2 http://127.0.0.1:3000/qa/questions/?product_id=9999&count=100
+artillery quick --count 100 --num 1000 http://127.0.0.1:3000/qa/questions/?product_id=1000000&count=100
+
+create index questions_products_seq on questions(product_id);
+create index answers_question_seq on answers(question_id);
+create index photos_answers_seq on photos(answer_id);
+
+explain analyze select * from answers where question_id = 2500001;
+gather
+2 workers
+ Planning Time: 0.047 ms
+ Execution Time: 247.783 ms
+ Planning Time: 0.046 ms
+ Execution Time: 250.024 ms
+  Planning Time: 0.048 ms
+ Execution Time: 249.996 ms
+  Planning Time: 0.052 ms
+ Execution Time: 254.592 ms
+----------------------------
+after indexing
+index scan
+ Planning Time: 0.334 ms
+ Execution Time: 0.035 ms
+  Planning Time: 0.054 ms
+ Execution Time: 0.025 ms
+  Planning Time: 0.053 ms
+ Execution Time: 0.024 ms
+  Planning Time: 0.061 ms
+ Execution Time: 0.021 ms
+
+
+
+explain analyze select * from questions where product_id = 1000000;
+Gather
+2 workers
+ Planning Time: 0.045 ms
+ Execution Time: 122.348 ms
+  Planning Time: 0.048 ms
+ Execution Time: 120.952 ms
+  Planning Time: 0.056 ms
+ Execution Time: 121.716 ms
+  Planning Time: 0.045 ms
+ Execution Time: 124.064 ms
+ ----------------------------
+after indexing
+index scan
+ Planning Time: 0.052 ms
+ Execution Time: 0.024 ms
+  Planning Time: 0.053 ms
+ Execution Time: 0.025 ms
+  Planning Time: 0.044 ms
+ Execution Time: 0.021 ms
+  Planning Time: 0.055 ms
+ Execution Time: 0.038 ms
