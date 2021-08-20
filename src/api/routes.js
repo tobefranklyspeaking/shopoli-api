@@ -1,5 +1,12 @@
 const Pool = require('pg').Pool;
-const POSTGRES_DB_LOGIN = require('/Users/franklyspeaking/HackReactor/sprints/ecommerce-api/config.js');
+require('dotenv').config();
+
+const POSTGRES_DB_LOGIN = {
+  host: process.env.host,
+  user: process.env.user,
+  database: process.env.database,
+  port: process.env.port
+};
 
 const pool = new Pool(POSTGRES_DB_LOGIN);
 
