@@ -12,7 +12,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/shale-rfe4/qanda">
+  <a href="https://github.com/shale-rfe4/ecommerce-api-qa">
     <img src="http://t3.gstatic.com/licensed-image?q=tbn:ANd9GcTXqLCtTIJVMkp-ywPWa_aOmdB4XoAqH5maOZdmg1haILmb5DEWdS9UA-Mx3LDQtnPnj1qyjk2ip9KIZr-6_mg" alt="Logo" width="80" height="80">
   </a>
 
@@ -21,19 +21,14 @@
   <p align="center">
     This project utilizes server design.
     <br />
-    <a href="https://github.com/shale-rfe4/qanda"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/shale-rfe4/ecommerce-api-qa"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/shale-rfe4/qanda">View Demo</a>
+    <a href="https://github.com/shale-rfe4/ecommerce-api-qa">View Demo</a>
     ·
-    <a href="https://github.com/melikaxo/hr-rfe4-shale/issues">
-
-
-
-
-      rt Bug</a>
+    <a href="https://github.com/shale-rfe4/issues"> Report Bug</a>
     ·
-    <a href="https://github.com/melikaxo/hr-rfe4-shale/issues">Request Feature</a>
+    <a href="https://github.com/shale-rfe4/issues">Request Feature</a>
   </p>
 </p>
 
@@ -105,12 +100,22 @@ To get a local copy up and running follow these simple steps.
 
 ### API Routes
 
+Questions Table Headers
+id	product_id	body	date_written	asker_name	asker_email	reported	helpful
+
+Answers Table Headers
+id  question_id  body  date_written  answerer_name  answerer_email  reported  helpful
+
+Photos Table Headers
+id  answer_id  url
+
 | ----- Requires formatting -----------|
 | List Questions |
 | GET /qa/questions |
-| product_id	 |  integer	   |   Specifies the product for which to retrieve questions. |
-| page	       |  integer	  |    Selects the page of results to return. Default 1.|
-| count	       |  integer	 |     Specifies how many results per page to return. Default 5. |
+| Parameters
+|   product_id	 |  integer	   |   Specifies the product for which to retrieve questions. |
+|   page	       |  integer	  |    Selects the page of results to return. Default 1.|
+|   count	       |  integer	 |     Specifies how many results per page to return. Default 5. |
 |
 | Answers List
 |   GET /qa/questions/:question_id/answers
@@ -122,6 +127,7 @@ To get a local copy up and running follow these simple steps.
 |
 | Add a Question
 |   POST /qa/questions
+|   Body Parameters
 |     body	          text	      	Text of question being asked
 |     name	          text	      	Username for question asker
 |     email	          text	       	Email address for question asker
@@ -139,16 +145,20 @@ To get a local copy up and running follow these simple steps.
 |
 | Mark Question as Helpful
 |   PUT /qa/questions/:question_id/helpful
+|   Parameters
 |     question_id	   integer		    Required ID of the question to update
 |
 | Report Question
 |   PUT /qa/questions/:question_id/report
+|   Parameters
 |     question_id	   integer      	Required ID of the question to update
 |
 | Mark Answer as Helpful
 |   PUT /qa/answers/:answer_id/helpful
+|   Parameters
 |     answer_id   	  integer	      Required ID of the answer to update
 |
 | Report Answer
 |   PUT /qa/answers/:answer_id/report
+|   Parameters
 |     answer_id	      integer	      Required ID of the answer to update

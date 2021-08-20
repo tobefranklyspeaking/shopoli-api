@@ -1,17 +1,7 @@
-# Logs
-logs
-*.log
-.log*
-
-# Bower dependency directory (https://bower.io/)
-bower_components
 
 # Dependency directories
 node_modules/
 
-# dotenv environment variables file
+# Files
+config.js
 .env
-.env.test
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
