@@ -12,23 +12,23 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/shale-rfe4/ecommerce-api-qa">
-    <img src="http://t3.gstatic.com/licensed-image?q=tbn:ANd9GcTXqLCtTIJVMkp-ywPWa_aOmdB4XoAqH5maOZdmg1haILmb5DEWdS9UA-Mx3LDQtnPnj1qyjk2ip9KIZr-6_mg" alt="Logo" width="80" height="80">
+  <a href="https://github.com/tobefranklyspeaking/shopoli-api">
+    <img src="https://i.imgur.com/JdKAOy8.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Project Shale</h3>
+  <h3 align="center">https://i.imgur.com/JdKAOy8.png</h3>
 
   <p align="center">
     This project utilizes server design.
     <br />
-    <a href="https://github.com/shale-rfe4/ecommerce-api-qa"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/tobefranklyspeaking/shopoli-api"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/shale-rfe4/ecommerce-api-qa">View Demo</a>
+    <a href="https://github.com/tobefranklyspeaking/shopoli-api">View Demo</a>
     ·
-    <a href="https://github.com/shale-rfe4/issues"> Report Bug</a>
+    <a href="https://github.com/tobefranklyspeaking/issues"> Report Bug</a>
     ·
-    <a href="https://github.com/shale-rfe4/issues">Request Feature</a>
+    <a href="https://github.com/tobefranklyspeaking/issues">Request Feature</a>
   </p>
 </p>
 
@@ -87,7 +87,7 @@ To get a local copy up and running follow these simple steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/johnrlangford/hr-rfe4-shale
+   git clone https://github.com/tobefranklyspeaking/shopoli-api
    ```
 2. Install NPM packages
    ```sh
