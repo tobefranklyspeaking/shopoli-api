@@ -13,14 +13,11 @@
 <br />
 <p align="center">
   <a href="https://github.com/tobefranklyspeaking/shopoli-api">
-    <img src="https://i.imgur.com/JdKAOy8.png" alt="Logo" width="80" height="80">
+    <img src="https://i.imgur.com/JdKAOy8.png" alt="Logo" width="200" height="auto">
   </a>
 
-<<<<<<< HEAD
-  <h3 align="center">https://i.imgur.com/JdKAOy8.png</h3>
-=======
   <h3 align="center">Shopoli API</h3>
->>>>>>> 21a02554bcc2a9f81454404451074a0bfc52f7b2
+  <h3 align="center">https://i.imgur.com/JdKAOy8.png</h3>
 
   <p align="center">
     This project utilizes server design.
