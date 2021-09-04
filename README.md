@@ -17,7 +17,6 @@
   </a>
 
   <h3 align="center">Shopoli API</h3>
-  <h3 align="center">https://i.imgur.com/JdKAOy8.png</h3>
 
   <p align="center">
     This project utilizes server design.
